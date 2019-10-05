@@ -1,6 +1,8 @@
 import cv2
 import dlib
 import numpy as np
+import time
+import pandas as pd
 
 # path
 video = '../zemi/MI09_56m_rhythm.avi'
@@ -12,14 +14,21 @@ cap = cv2.VideoCapture(video)
 CASCADE = cv2.CascadeClassifier(cascade)
 PREDICTOR = dlib.shape_predictor(predictor)
 face_detector = dlib.get_frontal_face_detector()
+msSum = 0
+msSum_2 = 0
+toki = []
+tukene = []
+houko = []
+tukene_2 = []
+houko_2 = []
 
 while(cap.isOpened()):
    ret, frame = cap.read()
-   size = frame.shape
-
-   #print(size)
    if ret == False:
       break
+   size = frame.shape
+   first = int(time.time() * 1000)
+   
 
    gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
    detected_faces = face_detector(gray, 1) # scalesize
@@ -28,15 +37,7 @@ while(cap.isOpened()):
    for rect in detected_faces:
       landmarks.append(np.array([[o.x,o.y] for o in PREDICTOR(gray, rect).parts()]))
 
-#print(landmarks[0]),     # Left eye left corner
-# print(landmarks[0][45]),     # Right eye right corne
-# print(landmarks[0][48]),     # Left Mouth corner
-# print(landmarks[0][54])      # Right mouth corner
-
-#2D image points. If you change the image, you need to change vector
    if len(landmarks) == 1:
-      print(len(landmarks))    # Nose tip
-      #print(landmarks[0]),     # Chin
       image_points1 = np.array([
                             landmarks[0][30],     # Nose tip
                             landmarks[0][8],     # Chin
@@ -93,8 +94,6 @@ while(cap.isOpened()):
       cv2.line(frame, p11, p21, (255,0,0), 2)
 
    elif len(landmarks) == 2:
-      print(len(landmarks))    # Nose tip
-      #print(landmarks[0]),     # Chin
       image_points1 = np.array([
                             landmarks[0][30],     # Nose tip
                             landmarks[0][8],     # Chin
@@ -156,18 +155,34 @@ while(cap.isOpened()):
       for q in image_points2:
           cv2.circle(frame, (int(q[0]),int(q[1])), 3, (0,0,255), -1)
 
-
+      last_2 = int(time.time())
+      msSum_2 = msSum_2 + (last_2 - first)
       p11 = ( int(image_points1[0][0]), int(image_points1[0][1]))
       p21 = ( int(nose_end_point2D1[0][0][0]), int(nose_end_point2D1[0][0][1]))
       p12 = ( int(image_points2[0][0]), int(image_points2[0][1]))
       p22 = ( int(nose_end_point2D2[0][0][0]), int(nose_end_point2D2[0][0][1]))
+      '''
+      TIME.append(msSum)
+      nosePoint_1.append(p11)
+      headEst_1.append(p21)
+      nosePoint_2.append(p12)
+      headEst_2.append(p22)
+      '''
+      df = pd.DataFrame([toki,tukene,houko,tukene_2,houko_2],
+                         index=['Time','nosePoint_1','headEstimate_1','nosePoint_2','headEstimate_2'])
+      dfr =  df.T
+      dfr.to_csv('test.csv')
 
 
       cv2.line(frame, p11, p21, (255,0,0), 2)
       cv2.line(frame, p12, p22, (255,0,0), 2)
+     
       
-   else:
-      print('No Face!!') 
+# time_edition
+   last = int(time.time() * 1000)
+   msSum = msSum + (last - first)
+   #print('time >> ' + str(msSum) + 'ms')
+
 # Display image
    cv2.imshow("frmame", frame)
    K = cv2.waitKey(1)

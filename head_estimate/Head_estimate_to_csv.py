@@ -17,7 +17,6 @@ face_detector = dlib.get_frontal_face_detector()
 
 # Variable
 msSum = 0
-msSum_2 = 0
 TIME = []
 Nose_Point_1 = []
 Head_Est_1 = []
@@ -99,8 +98,8 @@ while(cap.isOpened()):
       for q in image_points2:
           cv2.circle(frame, (int(q[0]),int(q[1])), 3, (0,0,255), -1)
 
-      last_2 = int(time.time()) # end_time
-      msSum_2 = msSum_2 + (last_2 - first)
+      last = int(time.time() * 1000) # end_time
+      msSum = msSum + (last - first)
 
       # Nose_point
       p11 = ( int(image_points1[0][0]), int(image_points1[0][1]))
@@ -109,13 +108,13 @@ while(cap.isOpened()):
       p22 = ( int(nose_end_point2D2[0][0][0]), int(nose_end_point2D2[0][0][1]))
       
 
-      toki.append(msSum)
-      tukene.append(p11)
-      houko.append(p21)
-      tukene_2.append(p12)
-      houko_2.append(p22)
+      TIME.append(msSum)
+      Nose_Point_1.append(p11)
+      Head_Est_1.append(p21)
+      Nose_Point_2.append(p12)
+      Head_Est_2.append(p22)
       
-      df = pd.DataFrame([toki,tukene,houko,tukene_2,houko_2],
+      df = pd.DataFrame([TIME,Nose_Point_1,Head_Est_1,Nose_Point_2,Head_Est_2],
                          index=['time','NosePoint_1','NoseEnd_1','NosePoint_2','NoseEnd_2'])
       dfr =  df.T
       dfr.to_csv('test.csv')
@@ -127,6 +126,7 @@ while(cap.isOpened()):
    cv2.imshow("frmame", frame)
    K = cv2.waitKey(1)
    if K == ord('q'):
+      break
 
 cap.release()
 cv2.destroyAllwindows()
