@@ -7,7 +7,6 @@ def open_file(txt):
       line     = line.rstrip('\n')
       line_sep = line.split(':')
       a.append(line_sep)
-      
    return a
 
 def main_loop(txt):
@@ -24,7 +23,6 @@ def main_loop(txt):
    if a == []:
       b = txt[-1][0]
       return b
-   
    return Sum
 
 inputfile = open_file('input.txt')
